@@ -279,20 +279,27 @@
 
         // Function to fetch articles from JSON file
         function fetchArticles() {
-            fetch('articles.json')
+            return fetch('articles.json')
                 .then(response => response.json())
                 .then(data => {
-                    articles = data; // Assign the loaded data to articles
-                    displayArticles(articles); // Display all articles initially
+                    articles = data; // Les données contiennent déjà les ASIN comme identifiants
+                    return articles;
                 })
                 .catch(error => console.error('Error loading the articles:', error));
+        }
+
+        function initializeApp() {
+            fetchArticles().then(() => {
+                filterArticles();
+                // Ajoutez ici d'autres initialisations si nécessaire
+            });
         }
 
         // Fonction pour créer et afficher les articles
         function displayArticles(filteredArticles) {
             const container = document.getElementById('articleContainer');
             container.innerHTML = '';
-            filteredArticles.forEach((article, index) => {
+            filteredArticles.forEach(article => {
                 const articleElement = document.createElement('div');
                 articleElement.className = 'article';
                 articleElement.innerHTML = `
@@ -302,7 +309,7 @@
                     <div class="article-info">
                         <h2 class="article-title">${article.title}</h2>
                         ${article.category ? `<p class="article-category">${article.category}</p>` : ''}
-                        <a href="#" class="article-link" data-article-id="${index}">Voir sur Amazon</a>
+                        <a href="#" class="article-link" data-asin="${article.asin}">Voir sur Amazon</a>
                     </div>
                 `;
                 container.appendChild(articleElement);
@@ -317,8 +324,8 @@
         // Fonction pour gérer les clics sur les liens d'articles
         function handleArticleClick(event) {
             event.preventDefault();
-            const articleId = event.target.getAttribute('data-article-id');
-            const article = articles[articleId];
+            const asin = event.target.getAttribute('data-asin');
+            const article = articles.find(a => a.asin === asin);
             if (article && article.url) {
                 window.open(article.url, '_blank');
             }
@@ -385,6 +392,7 @@
         form.onsubmit = function (e) {
             e.preventDefault();
             const newArticle = {
+                asin: `ASIN${Date.now()}`, // Génère un ASIN temporaire unique
                 title: document.getElementById("articleTitle").value,
                 image: document.getElementById("articleImage").value,
                 url: document.getElementById("articleUrl").value,
@@ -399,7 +407,8 @@
         }
 
         // Affichage initial de tous les articles
-        fetchArticles(articles);
+        document.addEventListener('DOMContentLoaded', initializeApp);
+        // fetchArticles(articles);
     </script>
 </body>
 
