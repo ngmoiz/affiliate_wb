@@ -292,7 +292,7 @@
         function displayArticles(filteredArticles) {
             const container = document.getElementById('articleContainer');
             container.innerHTML = '';
-            filteredArticles.forEach(article => {
+            filteredArticles.forEach((article, index) => {
                 const articleElement = document.createElement('div');
                 articleElement.className = 'article';
                 articleElement.innerHTML = `
@@ -302,13 +302,28 @@
                     <div class="article-info">
                         <h2 class="article-title">${article.title}</h2>
                         ${article.category ? `<p class="article-category">${article.category}</p>` : ''}
-                        <a href="${article.url}" class="article-link" target="_blank">Voir sur Amazon</a>
+                        <a href="#" class="article-link" data-article-id="${index}">Voir sur Amazon</a>
                     </div>
                 `;
                 container.appendChild(articleElement);
             });
+
+            // Ajouter des écouteurs d'événements pour les liens
+            document.querySelectorAll('.article-link').forEach(link => {
+                link.addEventListener('click', handleArticleClick);
+            });
         }
 
+        // Fonction pour gérer les clics sur les liens d'articles
+        function handleArticleClick(event) {
+            event.preventDefault();
+            const articleId = event.target.getAttribute('data-article-id');
+            const article = articles[articleId];
+            if (article && article.url) {
+                window.open(article.url, '_blank');
+            }
+        }
+        
         // Fonction pour filtrer les articles
         function filterArticles() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
